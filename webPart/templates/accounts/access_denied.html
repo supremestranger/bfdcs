@@ -1,0 +1,32 @@
+<!-- ============================================ -->
+<!-- templates/accounts/access_denied.html -->
+<!-- ============================================ -->
+{% extends 'base.html' %}
+
+{% block title %}Доступ запрещен{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 600px; margin: 100px auto; text-align: center;">
+    <div style="font-size: 80px; margin-bottom: 20px;">🚫</div>
+    <h1 style="color: #721c24; margin-bottom: 20px;">Доступ запрещен</h1>
+    <p style="color: #666; font-size: 18px; margin-bottom: 30px;">
+        У вас нет прав для просмотра этой страницы.
+    </p>
+    
+    {% if user.is_authenticated %}
+        {% if user.user_type == 'admin' %}
+            <a href="{% url 'admin_dashboard' %}" class="btn btn-primary">
+                Вернуться на панель управления
+            </a>
+        {% else %}
+            <a href="{% url 'user_dashboard' %}" class="btn btn-primary">
+                Вернуться в профиль
+            </a>
+        {% endif %}
+    {% else %}
+        <a href="{% url 'login' %}" class="btn btn-primary">
+            Войти в систему
+        </a>
+    {% endif %}
+</div>
+{% endblock %}
