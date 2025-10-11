@@ -1,0 +1,1 @@
+uvicorn master:app --port 8080

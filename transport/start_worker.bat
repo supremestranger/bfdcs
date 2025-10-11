@@ -1,0 +1,1 @@
+uvicorn worker:app --port 8004
