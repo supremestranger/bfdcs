@@ -2,9 +2,20 @@
 
 Без докера требуется строгое соблюдение инструкции по настройке ПО и окружения во избежание ошибок "на моей системе не работает". Можно качать портабл версии.
 
-Требуется скачать Git и Git клиент Git Fork:
+Требуется скачать Git, Git клиент Git Fork, Docker Desktop:
 1) Git https://git-scm.com/
 2) Git Fork https://git-fork.com/
+3) Docker Desktop https://docs.docker.com/
+
+В Docker-Desktop запустить необходимые контейнеры:
+1) Открыть консоль справа снизу
+2) При помощи ``cd <путь диретории проекта>`` открыть директорию проекта
+3) Если не доступен Docker Hub, используйте образы, находящиеся в папке dockerImage:
+	cd dockerImage
+	docker load -i mosquitto.tar
+	cd ..
+4) Запустить контейнеры
+	docker-compose up -d
 
 Также надо скачать Python https://www.python.org/downloads/
 

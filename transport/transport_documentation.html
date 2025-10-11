@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Документация системы распределенных вычислений</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --accent: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #34495e;
+            --success: #27ae60;
+            --warning: #f39c12;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--dark));
+            color: white;
+            padding: 2rem 0;
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .nav-tabs {
+            display: flex;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 2rem;
+        }
+
+        .tab {
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+            font-weight: 500;
+        }
+
+        .tab.active {
+            border-bottom: 3px solid var(--secondary);
+            color: var(--secondary);
+        }
+
+        .tab:hover:not(.active) {
+            background-color: #f8f9fa;
+        }
+
+        .tab-content {
+            display: none;
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 2rem;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        h3 {
+            color: var(--dark);
+            margin: 1.5rem 0 0.5rem 0;
+        }
+
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 1.5rem;
+            border-radius: 8px;
+            white-space: pre-wrap;
+            overflow-x: auto;
+            margin: 1rem 0;
+            font-family: 'Consolas', monospace;
+            font-size: 0.9rem;
+        }
+
+        .message-protocol {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin: 1.5rem 0;
+        }
+
+        .protocol-header {
+            background: var(--primary);
+            color: white;
+            padding: 1rem;
+            font-weight: bold;
+        }
+
+        .protocol-content {
+            padding: 1.5rem;
+        }
+
+        .task-list {
+            margin: 1.5rem 0;
+        }
+
+        .task-item {
+            background: white;
+            border-left: 4px solid var(--secondary);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 0 4px 4px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .task-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .task-meta {
+            flex-direction: column;
+            display: flex;
+            gap: 10px;
+            flex-shrink: 0;
+            margin-left: 20px;
+            align-items: stretch;
+        }
+
+        .task-id, .task-priority, .status-badge {
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .task-id {
+            background: var(--dark);
+            color: white;
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .task-priority {
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .priority-high {
+            background: var(--accent);
+            color: white;
+        }
+
+        .priority-medium {
+            background: var(--warning);
+            color: white;
+        }
+
+        .priority-low {
+            background: var(--success);
+            color: white;
+        }
+
+        .results-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .results-container {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-tabs {
+                flex-direction: column;
+            }
+        }
+
+        .status-badge {
+            display: inline-block;
+            white-space: pre-wrap;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-left: 0.5rem;
+        }
+
+        .status-todo {
+            background: #ffeaa7;
+            color: #e17055;
+        }
+
+        .status-inprogress {
+            background: #81ecec;
+            color: #02a3a1;
+        }
+
+        .status-pause {
+            background: #999;
+            color: #555;
+        }
+
+        .status-done {
+            background: #55efc4;
+            color: #00b894;
+        }
+
+        .task-meta {
+            display: flex;
+            gap: 10px;
+        }
+
+        .api-section {
+            margin-bottom: 3rem;
+        }
+
+        .api-section h3 {
+            color: var(--primary);
+            border-bottom: 2px solid var(--secondary);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .method-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border-left: 4px solid var(--secondary);
+        }
+
+        .method-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .method-name {
+            font-family: 'Consolas', monospace;
+            font-weight: bold;
+            color: var(--dark);
+            font-size: 1.1rem;
+        }
+
+        .method-type {
+            background: var(--light);
+            color: var(--dark);
+            padding: 0.3rem 0.8rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .method-description {
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .method-params, .method-returns, .method-attributes {
+            margin-bottom: 1rem;
+        }
+
+        .method-params strong, .method-returns strong, .method-attributes strong {
+            color: var(--dark);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .method-params ul, .method-attributes ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .method-params li, .method-attributes li {
+            margin-bottom: 0.3rem;
+            padding-left: 1rem;
+            position: relative;
+        }
+
+        .method-params li:before, .method-attributes li:before {
+            content: "•";
+            color: var(--secondary);
+            position: absolute;
+            left: 0;
+        }
+
+        .code-inline {
+            background: #f1f3f4;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Consolas', monospace;
+            font-size: 0.9rem;
+            color: var(--dark);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>Система распределенных вычислений</h1>
+            <p class="subtitle">Документация модуля взаимодействия между нодами</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="nav-tabs">
+            <div class="tab active" data-tab="overview">Обзор системы</div>
+            <div class="tab" data-tab="protocol">Протокол сообщений</div>
+            <div class="tab" data-tab="api">API Reference</div>
+            <div class="tab" data-tab="tasks">Задачи для реализации</div>
+            <div class="tab" data-tab="results">Управление результатами</div>
+        </div>
+
+        <div id="overview" class="tab-content active">
+            <h2>Архитектура системы</h2>
+            <p>Система состоит из двух основных компонентов:</p>
+
+            <h3>MasterNode</h3>
+            <p>Центральный управляющий узел, отвечающий за:</p>
+            <ul>
+                <li>Регистрацию и отслеживание вычислительных нод</li>
+                <li>Распределение задач между нодами</li>
+                <li>Сбор и агрегацию результатов</li>
+                <li>Реакцию на асинхронные смены статусов нод (через MQTT)</li>
+            </ul>
+
+            <h3>ComputeNode</h3>
+            <p>Вычислительные ноды, выполняющие:</p>
+            <ul>
+                <li>Регистрацию в системе при запуске</li>
+                <li>Выполнение полученных задач</li>
+                <li>Публикацию текущего статуса в топик <code>{node_id}/status</code> (retain)</li>
+                <li>Чистое завершение с публикацией <code>offline</code>, либо использование LWT для автоматической отметки <code>dead</code></li>
+            </ul>
+
+            <div class="code-block">
+// Пример инициализации MasterNode
+master = MasterNode(broker_host='localhost', broker_port=1883)
+master.set_dead_nodes_callback(on_dead)  # устанавливаем callback для обнаружения dead нод
+master.start()
+
+// Пример инициализации ComputeNode
+node = ComputeNode(broker_host='mqtt.broker.com')
+node.start()
+node.publish_status("ready")  // при необходимости менять статус
+            </div>
+        </div>
+
+        <div id="protocol" class="tab-content">
+            <h2>Протокол взаимодействия между нодами</h2>
+            <p>Взаимодействие между компонентами системы осуществляется через MQTT-брокер с использованием JSON-сообщений. Ключевая особенность текущей реализации — события смены статуса ноды публикуются в персональный статус-топик с retain и поддержкой LWT.</p>
+
+            <div class="message-protocol">
+                <div class="protocol-header">Сообщение инициализации ноды</div>
+                <div class="protocol-content">
+                    <p><strong>Топик:</strong> <code>initialisation</code></p>
+                    <p><strong>Направление:</strong> ComputeNode → MasterNode</p>
+                    <div class="code-block">
+{
+  "node_id": "550e8400-e29b-41d4-a716-446655440000",
+  "device_type": "esp-32",
+  "status": "connected"
+}
+                    </div>
+                </div>
+            </div>
+
+            <div class="message-protocol">
+                <div class="protocol-header">Сообщение задачи</div>
+                <div class="protocol-content">
+                    <p><strong>Топик:</strong> <code>{node_id}</code></p>
+                    <p><strong>Направление:</strong> MasterNode → ComputeNode</p>
+                    <div class="code-block">
+{
+  "task_id": "task_550e8400_e29b_41d4_a716_446655440000",
+  "task_info": {
+    "command": "compute",
+    "parameters": {
+      "data": "base64_encoded_data",
+      "algorithm": "matrix_multiplication"
+    }
+  },
+  "current_time": 1633456789.123
+}
+                    </div>
+                </div>
+            </div>
+
+            <div class="message-protocol">
+                <div class="protocol-header">Сообщение результата</div>
+                <div class="protocol-content">
+                    <p><strong>Топик:</strong> <code>results</code></p>
+                    <p><strong>Направление:</strong> ComputeNode → MasterNode</p>
+                    <div class="code-block">
+{
+  "task_id": "task_550e8400_e29b_41d4_a716_446655440000",
+  "node_id": "550e8400-e29b-41d4-a716-446655440000",
+  "result": {
+    "status": "success",
+    "data": "base64_encoded_result",
+    "execution_time": 2.45
+  },
+  "timestamp": 1633456791.568
+}
+                    </div>
+                </div>
+            </div>
+
+            <div class="message-protocol">
+                <div class="protocol-header">Статусы ноды (замена heartbeat)</div>
+                <div class="protocol-content">
+                    <p><strong>Топик:</strong> <code>{node_id}/status</code></p>
+                    <p><strong>Направление:</strong> ComputeNode → MasterNode (retain=True)</p>
+                    <p><strong>Особенности:</strong></p>
+                    <ul>
+                        <li>Сообщения публикуются с <code>retain=True</code> — мастер получает актуальный статус при (ре)подписке.</li>
+                        <li>Нода настраивает LWT: брокер опубликует <code>{"node_id": "...", "status": "dead"}</code> в этом топике, если соединение оборвётся некорректно.</li>
+                        <li>При корректном завершении нода публикует <code>offline</code> (и отключается) — LWT в этом случае не применяется.</li>
+                    </ul>
+                    <div class="code-block">
+{
+  "node_id": "550e8400-e29b-41d4-a716-446655440000",
+  "status": "ready"   // возможные статусы: connected, ready, busy, offline, dead
+}
+                    </div>
+                </div>
+            </div>
+
+            <p>Мастер подписан на wildcard-топик <code>+/status</code> и реагирует на входящие обновления статусов асинхронно.</p>
+        </div>
+
+        <div id="api" class="tab-content">
+            <h2>API Reference</h2>
+            <p>Полное описание методов и атрибутов классов MasterNode и ComputeNode. Методы разделены на <strong>внешние</strong> (публичные интерфейсы) и <strong>внутренние</strong> (callback-методы).</p>
+
+            <div class="api-section">
+                <h3>Класс MasterNode</h3>
+
+                <div class="method-card">
+                    <div class="method-header">
+                        <span class="method-name">Внешние методы</span>
+                        <span class="method-type">Интерфейс</span>
+                    </div>
+
+                    <div class="method-description">
+                        Методы, предназначенные для использования внешними компонентами/тестами.
+                    </div>
+
+                    <div class="method-params">
+                        <strong>start()</strong>
+                        <p>Устанавливает соединение с MQTT-брокером и запускает сетевой цикл (loop_start).</p>
+                    </div>
+
+                    <div class="method-params">
+                        <strong>set_dead_nodes_callback(cb)</strong>
+                        <p>Устанавливает callback-функцию <code>cb(dead_nodes_list)</code>, вызываемую при получении статуса <code>dead</code> от нод.</p>
+                    </div>
+
+                    <div class="method-params">
+                        <strong>send_task(node_id, task_data)</strong>
+                        <p>Отправляет задачу в топик конкретной ноды (публикация в MQTT).</p>
+                        <ul>
+                            <li><code>node_id</code> (string) — идентификатор ноды</li>
+                            <li><code>task_data</code> (str|dict) — данные задачи (обычно JSON/строка)</li>
+                        </ul>
+                    </div>
+
+                    <div class="method-params">
+                        <strong>get_node_info()</strong>
+                        <p>Возвращает текущий список зарегистрированных нод (список словарей).</p>
+                    </div>
+
+                    <div class="method-params">
+                        <strong>get_results()</strong>
+                        <p>Возвращает накопленные результаты (список) и обновляет счётчик <code>self.sended</code>.</p>
+                    </div>
+
+                    <div class="method-params">
+                        <strong>clear_results()</strong>
+                        <p>Очищает ранее возвращённые результаты и сбрасывает счётчик <code>self.sended</code>.</p>
+                    </div>
+
+                    <div class="method-params">
+                        <strong>forget_node(node_id)</strong>
+                        <p>Удаляет ноду из списка, отписывается от её статус-топика и корректирует список мёртвых нод.</p>
+                    </div>
+
+                    <div class="method-attributes">
+                        <strong>Основные атрибуты (видимы извне):</strong>
+                        <ul>
+                            <li><code>self.broker_host</code> — хост брокера</li>
+                            <li><code>self.broker_port</code> — порт брокера</li>
+                            <li><code>self.nodes</code> (list) — список зарегистрированных нод</li>
+                            <li><code>self.results</code> (list) — список результатов</li>
+                            <li><code>self.sended</code> (int) — счётчик возвращённых результатов</li>
+                            <li><code>self.dead_nodes</code> (list) — список id нод, помеченных как "dead"</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="method-card">
+                    <div class="method-header">
+                        <span class="method-name">Внутренние (callback) методы</span>
+                        <span class="method-type">Внутренняя логика</span>
+                    </div>
+
+                    <div class="method-description">
+                        Методы, используемые внутри класса для обработки событий MQTT. Не предназначены для прямого вызова внешними модулями.
+                    </div>
+
+                    <div class="method-params">
+                        <strong>_on_connect_(client, userdata, flags, rc)</strong>
+                        <p>Callback вызываемый при подключении к брокеру. Подписывает необходимые топики: <code>initialisation</code>, <code>results</code>, <code>+/status</code>.</p>
+                    </div>
+
+                    <div class="method-params">
+                        <strong>_on_message_(client, userdata, msg)</strong>
+                        <p>Callback обработки входящих сообщений. Маршрутизирует по топикам: <code>initialisation</code>, <code>results</code>, и <code>{node_id}/status</code>. При получении статуса <code>dead</code> помечает ноду и вызывает callback.</p>
+                    </div>
+
+                    <div class="method-attributes">
+                        <strong>Внутренние атрибуты:</strong>
+                        <ul>
+                            <li><code>self.client</code> — экземпляр MQTT-клиента</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="api-section">
+                <h3>Класс ComputeNode</h3>
+
+                <div class="method-card">
+                    <div class="method-header">
+                        <span class="method-name">Внешние методы</span>
+                        <span class="method-type">Интерфейс</span>
+                    </div>
+
+                    <div class="method-description">
+                        Публичные методы и атрибуты, необходимые для запуска и взаимодействия ноды с системой.
+                    </div>
+
+                    <div class="method-params">
+                        <strong>start()</strong>
+                        <p>Устанавливает соединение с брокером, запускает сетевой цикл, публикует <code>initialisation</code> и текущий статус (retain).</p>
+                    </div>
+
+                    <div class="method-params">
+                        <strong>publish_status(status)</strong>
+                        <p>Публикация нового статуса в топик <code>{node_id}/status</code> с <code>retain=True</code>. Статусы: <code>connected</code>, <code>ready</code>, <code>busy</code>, <code>offline</code>, <code>dead</code> (LWT).</p>
+                    </div>
+
+                    <div class="method-attributes">
+                        <strong>Основные атрибуты:</strong>
+                        <ul>
+                            <li><code>self.broker_host</code> — хост брокера</li>
+                            <li><code>self.broker_port</code> — порт брокера</li>
+                            <li><code>self.node_id</code> (string) — уникальный идентификатор ноды</li>
+                            <li><code>self.client</code> — экземпляр MQTT клиента</li>
+                            <li><code>self.status</code> — текущий статус ноды</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="method-card">
+                    <div class="method-header">
+                        <span class="method-name">Внутренние (callback) методы</span>
+                        <span class="method-type">Внутренняя логика</span>
+                    </div>
+
+                    <div class="method-description">
+                        Внутренние функции для установки LWT, обработки входящих задач и корректного завершения.
+                    </div>
+
+                    <div class="method-params">
+                        <strong>_on_connect_(client, userdata, flags, rc)</strong>
+                        <p>Callback при подключении к брокеру. Отправляет сообщение инициализации и подписывается на персональный топик ноды.</p>
+                    </div>
+
+                    <div class="method-params">
+                        <strong>_on_message_(client, userdata, msg)</strong>
+                        <p>Callback обработки задач из топика ноды; внутри — логика выполнения задач.</p>
+                    </div>
+
+                    <div class="method-params">
+                        <strong>_graceful_shutdown_(signum, frame)</strong>
+                        <p>При корректном завершении публикует <code>offline</code>, отключается от брокера и останавливает loop. LWT при корректном отключении не сработает.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tasks" class="tab-content">
+            <h2>Задачи для реализации</h2>
+            <p>Обновлённый список приоритетных задач, соответствующий текущей реализации:</p>
+
+            <div class="task-list">
+                <div class="task-item">
+                    <div class="task-content">
+                        <h3>Использовать LWT и retained-статусы вместо heartbeat</h3>
+                        <p>Ноды публикуют статус в <code>{node_id}/status</code> с <code>retain=True</code>. Настроить LWT на публикацию <code>dead</code> при внезапном разрыве соединения.</p>
+                    </div>
+                    <div class="task-meta">
+                        <span class="task-id">TASK-010</span>
+                        <span class="task-priority priority-high">Высокий</span>
+                        <span class="status-badge status-done">      Готово      </span>
+                    </div>
+                </div>
+
+                <div class="task-item">
+                    <div class="task-content">
+                        <h3>Callback для обработки мёртвых нод</h3>
+                        <p>Реализовать/подключить функцию-обработчик <code>set_dead_nodes_callback</code> для реакции на статусы <code>dead</code>.</p>
+                    </div>
+                    <div class="task-meta">
+                        <span class="task-id">TASK-011</span>
+                        <span class="task-priority priority-high">Высокий</span>
+                        <span class="status-badge status-inprogress">     В работе     </span>
+                    </div>
+                </div>
+
+                <div class="task-item">
+                    <div class="task-content">
+                        <h3>Тестирование переходов статусов и LWT</h3>
+                        <p>Покрыть тестами сценарии: корректное завершение (offline), некорректное завершение (LWT -> dead), изменение статусов (ready → busy → ready).</p>
+                    </div>
+                    <div class="task-meta">
+                        <span class="task-id">TASK-012</span>
+                        <span class="task-priority priority-medium">Средний</span>
+                        <span class="status-badge status-todo">К исполнению</span>
+                    </div>
+                </div>
+
+                <div class="task-item">
+                    <div class="task-content">
+                        <h3>Улучшение хранения результатов</h3>
+                        <p>Перейти к именованному хранению результатов (по task_id) для надёжного доступа и удаления.</p>
+                    </div>
+                    <div class="task-meta">
+                        <span class="task-id">TASK-013</span>
+                        <span class="task-priority priority-medium">Средний</span>
+                        <span class="status-badge status-todo">К исполнению</span>
+                    </div>
+                </div>
+
+                <div class="task-item">
+                    <div class="task-content">
+                        <h3>Логирование</h3>
+                        <p>Ипользовать реализуемый в будущем модуль логирования вместо "print"</p>
+                    </div>
+                    <div class="task-meta">
+                        <span class="task-id">TASK-014</span>
+                        <span class="task-priority priority-low">Низкий</span>
+                        <span class="status-badge status-todo">К исполнению</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="results" class="tab-content">
+            <h2>Управление результатами вычислений</h2>
+
+            <div class="results-container">
+                <div>
+                    <h3>Текущая реализация</h3>
+                    <p>В текущей реализации используется список <code>results</code> с методами <code>get_results()</code> и <code>clear_results()</code>. Это остаётся рабочим вариантом для демонстрации.</p>
+
+                    <div class="code-block">
+class MasterNode:
+    def __init__(self, broker_host='localhost', broker_port=1883):
+        # ...
+        self.results = []  # Список для хранения результатов
+        self.sended = 0    # Счетчик возвращённых результатов
+
+    def get_results(self):
+        self.sended = len(self.results)
+        return self.results
+
+    def clear_results(self):
+        del self.results[0:self.sended]
+        self.sended = 0
+                    </div>
+                </div>
+
+                <div>
+                    <h3>Рекомендуемое улучшение</h3>
+                    <p>Для более надёжного управления результатами рекомендуется использовать словарь по <code>task_id</code>:</p>
+
+                    <div class="code-block">
+class MasterNode:
+    def __init__(self, broker_host='localhost', broker_port=1883):
+        # ...
+        self.results = {}  # Словарь для хранения результатов по task_id
+
+    def add_result(self, task_id, result_data):
+        self.results[task_id] = {
+            'data': result_data,
+            'timestamp': time.time(),
+            'status': 'completed'
+        }
+
+    def get_result(self, task_id):
+        return self.results.get(task_id)
+
+    def get_all_results(self):
+        return self.results
+
+    def clear_result(self, task_id):
+        if task_id in self.results:
+            del self.results[task_id]
+                    </div>
+                </div>
+            </div>
+
+            <h3>Преимущества именованного хранения</h3>
+            <ul>
+                <li>Быстрый доступ к результатам по <code>task_id</code></li>
+                <li>Возможность отслеживания статуса выполнения каждой задачи</li>
+                <li>Простота удаления и повторных запросов</li>
+            </ul>
+
+            <h3>Рекомендации по тестированию LWT и status flow</h3>
+            <ol>
+                <li>Запустите мастер и ноду; проверьте, что мастер получает retained-статус ноды после подписки.</li>
+                <li>Вызовите <code>publish_status("busy")</code> и убедитесь, что мастер получает обновление.</li>
+                <li>Корректно завершите ноду (Ctrl+C) — мастер должен получить статус <code>offline</code>.</li>
+                <li>Принудительно убейте ноду (kill -9) — брокер должен опубликовать LWT <code>dead</code> в <code>{node_id}/status</code>, мастер уведомлён.</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const targetTab = tab.getAttribute('data-tab');
+
+                    // Deactivate all tabs
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(tc => tc.classList.remove('active'));
+
+                    // Activate current tab
+                    tab.classList.add('active');
+                    document.getElementById(targetTab).classList.add('active');
+                });
+            });
+        });
+    </script>
+</body>
+</html>
