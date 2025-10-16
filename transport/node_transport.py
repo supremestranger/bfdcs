@@ -11,6 +11,9 @@ class ComputeNodeTransport:
         self.broker_host = broker_host
         self.broker_port = broker_port
         self.node_id = str(uuid.uuid4())
+        self.tasks = {
+            1:[], 2:[], 3:[], 4:[], 5:[], 6:[], 7:[], 8:[], 9:[], 10:[]
+        }
 
         self.client = mqtt.Client(client_id=self.node_id, clean_session=True)
         # LWT: если нода отвалится некорректно — брокер опубликует в топик <node_id>/status сообщение dead (retain=True)
@@ -27,15 +30,18 @@ class ComputeNodeTransport:
         signal.signal(signal.SIGINT, self._graceful_shutdown_)
         signal.signal(signal.SIGTERM, self._graceful_shutdown_)
 
+    def __log__(self, log):  # TODO: Заменить на обращение к модулю логирования
+        print(log)
+
     def _on_connect_(self, client, userdata, flags, rc):
-        print("Node connected to broker (on_connect callback)")
+        self.__log__("Node connected to broker (on_connect callback)")
         return
 
     def _on_message_(self, client, userdata, msg):
         try:
             task_data = json.loads(msg.payload.decode())
             if task_data.get("task_info", {}).get("command") == "init":
-                print("Initialisation received")
+                self.__log__("Initialisation received")
                 self.publish_status("ready")
                 # пример изменения статуса при выполнении работы
                 # publish_status("busy")  # если нужно пометить, что нода занята
@@ -43,14 +49,16 @@ class ComputeNodeTransport:
                 # publish_status("ready")  # вернуть ready
             else:
                 # Обработка других задач
-                print("Task received:", task_data)
+                self.__log__("Task received:", task_data)
+                priority = max(1, min(task_data.get("priority", 0), 10))
+                self.tasks[priority].append(task_data)
         except Exception as e:
-            print(f"Error processing message: {e}")
+            self.__log__(f"Error processing message: {e}")
 
     def _graceful_shutdown_(self, signum=None, frame=None):
         """Чистое завершение: уведомим мастер, что нода offline (retain=True), затем отключимся."""
         try:
-            print("Graceful shutdown: publishing offline")
+            self.__log__("Graceful shutdown: publishing offline")
             self.publish_status("offline")
             # небольшая пауза, чтобы сообщение дошло
             time.sleep(0.5)
@@ -61,7 +69,7 @@ class ComputeNodeTransport:
             self.client.loop_stop()
         except Exception:
             pass
-        print("Node stopped")
+        self.__log__("Node stopped")
         sys.exit(0)
 
     def start(self):
@@ -79,7 +87,7 @@ class ComputeNodeTransport:
         self.publish_status("connected")
         # подписываемся на топик с задачами для ноды
         self.client.subscribe(self.node_id)
-        print(f"Node {self.node_id} started and registered")
+        self.__log__(f"Node {self.node_id} started and registered")
 
     def publish_status(self, status):
         """Публикация нового статуса (retain=True)."""
@@ -87,8 +95,17 @@ class ComputeNodeTransport:
         status_msg = {"node_id": self.node_id, "status": status}
         # оставляем retain=True, чтобы мастер получал актуальный статус при подписке
         self.client.publish(f"{self.node_id}/status", json.dumps(status_msg), qos=1, retain=True)
-        print(f"Published status: {status}")
+        self.__log__(f"Published status: {status}")
 
+    def send_result(self, result):
+        res_msg = {
+            "node_id": self.node_id,
+            "result": result
+        }
+        self.client.publish("result", json.dumps(res_msg), qos=1, retain=True)
+
+    def get_task(self):
+        return self.tasks.pop(0)
 
 # Пример использования
 if __name__ == "__main__":
