@@ -39,8 +39,11 @@ class ComputeNodeTransport:
 
     def _on_message_(self, client, userdata, msg):
         try:
+            if not msg.payload:
+                self.__log__("Empty message received")
+                return
             task_data = json.loads(msg.payload.decode())
-            if task_data.get("task_info", {}).get("command") == "init":
+            if task_data.get("task_info", {}).get("command") == "init":# не поняла прикола
                 self.__log__("Initialisation received")
                 self.publish_status("ready")
                 # пример изменения статуса при выполнении работы
@@ -52,8 +55,10 @@ class ComputeNodeTransport:
                 self.__log__("Task received:", task_data)
                 priority = max(1, min(task_data.get("priority", 0), 10))
                 self.tasks[priority].append(task_data)
+        except json.JSONDecodeError as e:
+            self.__log__(f"Invalid JSON in task: {e}")
         except Exception as e:
-            self.__log__(f"Error processing message: {e}")
+            self.__log__(f"Error processing task: {e}")
 
     def _graceful_shutdown_(self, signum=None, frame=None):
         """Чистое завершение: уведомим мастер, что нода offline (retain=True), затем отключимся."""
@@ -100,25 +105,19 @@ class ComputeNodeTransport:
     def send_result(self, result):
         res_msg = {
             "node_id": self.node_id,
-            "result": result
+            "result": result,
+            "timestamp": time.time()
         }
-        self.client.publish("result", json.dumps(res_msg), qos=1, retain=True)
+        self.client.publish("results", json.dumps(res_msg), qos=1, retain=True)
 
     def get_task(self):
-        return self.tasks.pop(0)
+        for priority in range(10, 0, -1):
+            if self.tasks[priority]:
+                return self.tasks[priority].pop(0)
+        return None
 
 # Пример использования
 if __name__ == "__main__":
-    node = ComputeNodeTransport()
+    node = ComputeNodeTransport(broker_host='127.0.0.1')
     node.start()
 
-    # Демонстрация: можно программно менять статус в любой момент
-    try:
-        while True:
-            # здесь можно изменить статус, когда нода начинает/заканчивает задачу:
-            # node.publish_status("busy")
-            # time.sleep(5)
-            # node.publish_status("ready")
-            time.sleep(1)
-    except KeyboardInterrupt:
-        node._graceful_shutdown_()
